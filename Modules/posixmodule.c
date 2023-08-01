@@ -1596,6 +1596,30 @@ attributes_from_dir(LPCWSTR pszFile, BY_HANDLE_FILE_INFORMATION *info, ULONG *re
     return TRUE;
 }
 
+/* Grab GetFinalPathNameByHandle dynamically from kernel32 */
+static int has_GetFinalPathNameByHandle = -1;
+static DWORD(CALLBACK* Py_GetFinalPathNameByHandleW)(HANDLE, LPWSTR, DWORD, DWORD);
+static int
+check_GetFinalPathNameByHandle()
+{
+    HINSTANCE hKernel32;
+    DWORD(CALLBACK * Py_GetFinalPathNameByHandleA)(HANDLE, LPSTR, DWORD,
+        DWORD);
+
+    /* only recheck */
+    if (-1 == has_GetFinalPathNameByHandle)
+    {
+        hKernel32 = GetModuleHandleW(L"KERNEL32");
+        *(FARPROC*)&Py_GetFinalPathNameByHandleA = GetProcAddress(hKernel32,
+            "GetFinalPathNameByHandleA");
+        *(FARPROC*)&Py_GetFinalPathNameByHandleW = GetProcAddress(hKernel32,
+            "GetFinalPathNameByHandleW");
+        has_GetFinalPathNameByHandle = Py_GetFinalPathNameByHandleA &&
+            Py_GetFinalPathNameByHandleW;
+    }
+    return has_GetFinalPathNameByHandle;
+}
+
 static BOOL
 get_target_path(HANDLE hdl, wchar_t **target_path)
 {
@@ -1604,8 +1628,8 @@ get_target_path(HANDLE hdl, wchar_t **target_path)
 
     /* We have a good handle to the target, use it to determine
        the target path name (then we'll call lstat on it). */
-    buf_size = GetFinalPathNameByHandleW(hdl, 0, 0,
-                                         VOLUME_NAME_DOS);
+    buf_size = Py_GetFinalPathNameByHandleW(hdl, 0, 0,
+                                            VOLUME_NAME_DOS);
     if(!buf_size)
         return FALSE;
 
@@ -1615,7 +1639,7 @@ get_target_path(HANDLE hdl, wchar_t **target_path)
         return FALSE;
     }
 
-    result_length = GetFinalPathNameByHandleW(hdl,
+    result_length = Py_GetFinalPathNameByHandleW(hdl,
                        buf, buf_size, VOLUME_NAME_DOS);
 
     if(!result_length) {
@@ -1639,6 +1663,12 @@ win32_xstat_impl(const wchar_t *path, struct _Py_stat_struct *result,
     ULONG reparse_tag = 0;
     wchar_t *target_path;
     const wchar_t *dot;
+
+    if (!check_GetFinalPathNameByHandle()) {
+        /* If the OS doesn't have GetFinalPathNameByHandle, don't
+           traverse reparse point. */
+        traverse = FALSE;
+    }
 
     hFile = CreateFileW(
         path,
@@ -3751,6 +3781,13 @@ os__getfinalpathname_impl(PyObject *module, path_t *path)
     int result_length;
     PyObject *result;
 
+    if (!check_GetFinalPathNameByHandle()) {
+        /* If the OS doesn't have GetFinalPathNameByHandle, return a
+           NotImplementedError. */
+        return PyErr_Format(PyExc_NotImplementedError,
+            "GetFinalPathNameByHandle not available on this platform");
+    }
+
     Py_BEGIN_ALLOW_THREADS
     hFile = CreateFileW(
         path->wide,
@@ -3771,8 +3808,8 @@ os__getfinalpathname_impl(PyObject *module, path_t *path)
        target path name. */
     while (1) {
         Py_BEGIN_ALLOW_THREADS
-        result_length = GetFinalPathNameByHandleW(hFile, target_path,
-                                                  buf_size, VOLUME_NAME_DOS);
+        result_length = Py_GetFinalPathNameByHandleW(hFile, target_path,
+                                                     buf_size, VOLUME_NAME_DOS);
         Py_END_ALLOW_THREADS
 
         if (!result_length) {

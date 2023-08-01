@@ -307,7 +307,7 @@ http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libc/net/getaddrinfo.c.diff?r1=1.82&
 # endif
 
 /* Provides the IsWindows7SP1OrGreater() function */
-#include <versionhelpers.h>
+#include "VersionHelpers.h"
 
 /* remove some flags on older version Windows during run-time.
    https://msdn.microsoft.com/en-us/library/windows/desktop/ms738596.aspx */
