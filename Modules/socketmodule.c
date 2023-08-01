@@ -399,6 +399,13 @@ remove_unusable_flags(PyObject *m)
 #  include "addrinfo.h"
 #endif
 
+#ifdef HAVE_INET_PTON
+#if !defined(NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN)
+int inet_pton(int af, const char *src, void *dst);
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+#endif
+#endif
+
 #ifdef __APPLE__
 /* On OS X, getaddrinfo returns no error indication of lookup
    failure, so we must use the emulation instead of the libinfo
@@ -8006,3 +8013,45 @@ PyInit__socket(void)
 
     return m;
 }
+
+#ifdef HAVE_INET_PTON
+#if !defined(NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN)
+
+/* Simplistic emulation code for inet_pton that only works for IPv4 */
+/* These are not exposed because they do not set errno properly */
+
+int
+inet_pton(int af, const char *src, void *dst)
+{
+    if (af == AF_INET) {
+#if (SIZEOF_INT != 4)
+#error "Not sure if in_addr_t exists and int is not 32-bits."
+#endif
+        unsigned int packed_addr;
+        packed_addr = inet_addr(src);
+        if (packed_addr == INADDR_NONE)
+            return 0;
+        memcpy(dst, &packed_addr, 4);
+        return 1;
+    }
+    /* Should set errno to EAFNOSUPPORT */
+    return -1;
+}
+
+const char *
+inet_ntop(int af, const void *src, char *dst, socklen_t size)
+{
+    if (af == AF_INET) {
+        struct in_addr packed_addr;
+        if (size < 16)
+            /* Should set errno to ENOSPC. */
+            return NULL;
+        memcpy(&packed_addr, src, sizeof(packed_addr));
+        return strncpy(dst, inet_ntoa(packed_addr), size);
+    }
+    /* Should set errno to EAFNOSUPPORT */
+    return NULL;
+}
+
+#endif
+#endif
