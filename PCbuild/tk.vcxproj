@@ -44,6 +44,7 @@
   <Import Project="tcltk.props" />
   
   <PropertyGroup Label="Configuration">
+    <PlatformToolset>v141_xp</PlatformToolset>
     <ConfigurationType>Makefile</ConfigurationType>
     <OutDir>$(tcltkDir)</OutDir>
     <TargetPath>$(OutDir)bin\$(tkDLLName)</TargetPath>
@@ -59,6 +60,7 @@
     <WarningsFlags>WARNINGS="-W3 -wd4244 -wd4267 -wd4311 -wd4312 -wd4334"</WarningsFlags>
     <NMakeBuildCommandLine>setlocal
 set VCINSTALLDIR=$(VCInstallDir)
+call "$(VCInstallDir)Auxiliary\Build\vcvarsall.bat" x86 10.0.10240.0 -vcvars_ver=14.16
 cd /D "$(tkDir)win"
 nmake /nologo -f makefile.vc RC=rc MACHINE=$(TclMachine) OPTS=$(TkOpts) $(TkDirs) $(DebugFlags) $(WarningsFlags) all
 nmake /nologo -f makefile.vc RC=rc MACHINE=$(TclMachine) OPTS=$(TkOpts) $(TkDirs) $(DebugFlags) $(WarningsFlags) install-binaries install-libraries

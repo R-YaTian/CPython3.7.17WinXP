@@ -45,6 +45,7 @@
   <Import Project="tcltk.props" />
   
   <PropertyGroup Label="Configuration">
+    <PlatformToolset>v141_xp</PlatformToolset>
     <ConfigurationType>Makefile</ConfigurationType>
     <OutDir>$(tcltkDir)</OutDir>
     <TargetPath>$(tixDLLPath)</TargetPath>
@@ -59,6 +60,7 @@
     <CFlags>-c -W3 -nologo -MD -wd4028 -wd4090 -wd4244 -wd4267 -wd4312</CFlags>
     <NMakeBuildCommandLine>setlocal
 set VCINSTALLDIR=$(VCInstallDir)
+call "$(VCInstallDir)Auxiliary\Build\vcvarsall.bat" x86 10.0.10240.0 -vcvars_ver=14.16
 cd /D "$(tixDir)win"
 nmake /nologo -f makefile.vc MACHINE=$(TclMachine) cflags="$(CFlags)" $(DebugFlags) $(TclShortVersions) $(TixDirs) all install
 copy /Y ..\license.terms "$(OutDir)\tixlicense.terms"

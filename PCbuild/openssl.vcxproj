@@ -59,7 +59,7 @@
     <OutDir>$(opensslOutDir)</OutDir>
     <NMakeBuildCommandLine>setlocal
 set VCINSTALLDIR=$(VCInstallDir)
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86 10.0.10240.0 -vcvars_ver=14.16
+call "$(VCInstallDir)Auxiliary\Build\vcvarsall.bat" x86 10.0.10240.0 -vcvars_ver=14.16
 if not exist "$(IntDir.TrimEnd('\'))" mkdir "$(IntDir.TrimEnd('\'))"
 cd /D "$(IntDir.TrimEnd('\'))"
 $(Perl) "$(opensslDir)\configure" $(OpenSSLPlatform) no-asm -D_WIN32_WINNT=0x0501 -D_USING_V110_SDK71_ -L/subsystem:console,"5.01"

@@ -527,3 +527,4 @@ python.bat
 !/externals/tcl-core-8.6.9.0/library/platform
 !/externals/zlib-1.2.12/win32
 !/externals/openssl-bin-1.1.1u/win32
+!/externals/tcltk-8.6.9.0/win32
