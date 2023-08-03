@@ -10,7 +10,9 @@ Run the following on python source root using cmd:
 set APPX_DATA_PUBLISHER=<your certificate subject name>
 set APPX_DATA_SHA256=<your certificate SHA256>
 When building 32bit-Python, you should run this with 64bit-Python:
-python3 Tools/msi/get_packagefamilyname.py
+python3 Tools/msi/getpackagefamilyname.py
+set APPX_PACKAGEFAMILYNAME=<output of last cmd>
+And run the following using cmd:
 python PC/layout --copy win32 --include-appxmanifest
 Then run the following using powershell:
 Tools/msi/make_appx.ps1 win32 python.msix

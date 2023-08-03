@@ -30,5 +30,4 @@ if __name__ == "__main__":
     p_name = "PythonSoftwareFoundation.Python.3.7"
     p_publisher = os.getenv("APPX_DATA_PUBLISHER")
     pfn = get_packagefamilyname(p_name, p_publisher)
-    os.setenv("APPX_PACKAGEFAMILYNAME", pfn)
     print(pfn)
