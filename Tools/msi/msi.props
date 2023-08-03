@@ -54,7 +54,7 @@
         <OutputPath Condition="!HasTrailingSlash($(OutputPath))">$(OutputPath)\</OutputPath>
         <OutDir>$(OutputPath)</OutDir>
         <ReuseCabinetCache>true</ReuseCabinetCache>
-        <CRTRedist Condition="'$(CRTRedist)' == ''">$(ExternalsDir)\windows-installer\redist-1\$(Platform)</CRTRedist>
+        <CRTRedist Condition="'$(CRTRedist)' == ''">$(ExternalsDir)\windows-installer\redist\$(Platform)</CRTRedist>
         <CRTRedist>$([System.IO.Path]::GetFullPath($(CRTRedist)))</CRTRedist>
         <DocFilename>python$(MajorVersionNumber)$(MinorVersionNumber)$(MicroVersionNumber)$(ReleaseLevelName).chm</DocFilename>
 
